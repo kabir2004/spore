@@ -6,7 +6,8 @@ import { Button } from '@/components/shared/Button';
 
 export default function WelcomePage() {
     return (
-        <div className="w-full max-w-[440px] flex flex-col items-center text-center">
+        <div className="min-h-screen w-full flex items-center justify-center px-6 py-12">
+            <div className="w-full max-w-[440px] flex flex-col items-center text-center">
             <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-bg-elevated border border-border-default mb-8 overflow-hidden shadow-md">
                 <AppLogo size={44} className="object-contain" />
             </div>
@@ -46,6 +47,7 @@ export default function WelcomePage() {
                 {' '}and{' '}
                 <a href="#" className="text-accent-blue hover:underline">Privacy Policy</a>.
             </p>
+        </div>
         </div>
     );
 }
