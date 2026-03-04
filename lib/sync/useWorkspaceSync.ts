@@ -50,21 +50,10 @@ export function useWorkspaceSync(
                 return;
             }
 
-            // Ensure workspace record exists in Zustand
-            store.createWorkspace(workspaceSlug, workspaceName);
-
-            // Directly update the rootId in case createWorkspace generated a different one
-            useWorkspaceStore.setState((s) => ({
-                workspaces: {
-                    ...s.workspaces,
-                    [workspaceSlug]: { name: workspaceName, rootId },
-                },
-            }));
-
-            // Hydrate all blocks
-            for (const row of data ?? []) {
+            // Map all rows to IBlock and atomically replace store (clears mock state)
+            const blocks: IBlock[] = (data ?? []).map((row) => {
                 const r = row as Record<string, unknown>;
-                const block: IBlock = {
+                return {
                     id: r.id as string,
                     type: r.type as IBlock['type'],
                     properties: (r.properties as IBlock['properties']) ?? {},
@@ -73,8 +62,9 @@ export function useWorkspaceSync(
                     created_time: r.created_time as number,
                     last_edited_time: r.last_edited_time as number,
                 };
-                store.addBlock(block);
-            }
+            });
+
+            store.hydrateWorkspace(workspaceSlug, workspaceName, rootId, blocks);
         };
 
         loadBlocks();

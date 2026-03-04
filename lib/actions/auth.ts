@@ -1,9 +1,30 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { getAuthErrorMessage } from '@/lib/auth-messages';
+
+/**
+ * Base URL for the current request (used for OAuth redirects, email links, etc.).
+ * Uses request Host header in production so redirects stay on the deployed domain
+ * even when NEXT_PUBLIC_SITE_URL is not set.
+ */
+async function getBaseUrl(): Promise<string> {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (siteUrl) return siteUrl;
+
+    try {
+        const h = await headers();
+        const host = h.get('x-forwarded-host') ?? h.get('host');
+        const proto = h.get('x-forwarded-proto') ?? (host?.includes('localhost') ? 'http' : 'https');
+        if (host) return `${proto}://${host}`;
+    } catch {
+        // headers() can throw in some edge cases
+    }
+    return 'http://localhost:3000';
+}
 
 /**
  * Derives a URL-safe workspace slug from an email address.
@@ -31,14 +52,14 @@ export async function signUp(
     fullName: string
 ): Promise<{ error: string } | { needToConfirmEmail: true; message?: string } | never> {
     const supabase = await createClient();
+    const baseUrl = await getBaseUrl();
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
             data: { full_name: fullName },
-            emailRedirectTo: `${siteUrl}/auth/confirm`,
+            emailRedirectTo: `${baseUrl}/auth/confirm`,
         },
     });
 
@@ -143,11 +164,12 @@ export async function signIn(
  */
 export async function signInWithGoogle(): Promise<{ url: string } | { error: string }> {
     const supabase = await createClient();
+    const baseUrl = await getBaseUrl();
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+            redirectTo: `${baseUrl}/auth/callback`,
             queryParams: { access_type: 'offline', prompt: 'consent' },
         },
     });
@@ -162,11 +184,12 @@ export async function signInWithGoogle(): Promise<{ url: string } | { error: str
  */
 export async function signInWithMicrosoft(): Promise<{ url: string } | { error: string }> {
     const supabase = await createClient();
+    const baseUrl = await getBaseUrl();
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'azure',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+            redirectTo: `${baseUrl}/auth/callback`,
         },
     });
 
@@ -188,7 +211,7 @@ export async function signOut(): Promise<never> {
  */
 export async function requestPasswordReset(email: string): Promise<{ error: string } | { success: true }> {
     const supabase = await createClient();
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+    const baseUrl = await getBaseUrl();
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
         redirectTo: `${baseUrl}/auth/callback?next=/login`,
     });

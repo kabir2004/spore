@@ -1053,6 +1053,8 @@ interface WorkspaceState {
     getBlock: (id: string) => IBlock | undefined;
     getWorkspaceRootId: (slug: string) => string;
     createWorkspace: (slug: string, name: string) => void;
+    /** Atomically replace all blocks with fresh Supabase data. Clears mock state. */
+    hydrateWorkspace: (slug: string, name: string, rootId: string, blocks: IBlock[]) => void;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -1120,6 +1122,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
                     };
                 }
                 return { blocks: newBlocks };
+            }),
+
+            hydrateWorkspace: (slug, name, rootId, blocks) => set(() => {
+                const newBlocks: Record<string, IBlock> = {};
+                for (const b of blocks) {
+                    newBlocks[b.id] = b;
+                }
+                return {
+                    blocks: newBlocks,
+                    workspaces: { [slug]: { name, rootId } },
+                };
             }),
 
             createWorkspace: (slug, name) => set((state) => {
