@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: dark: utilities apply when html has .dark (app theme toggle) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-hover: var(--bg-hover);
+  --color-bg-active: var(--bg-active);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-border-default: var(--border-default);
+  --color-border-light: var(--border-light);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-placeholder: var(--text-placeholder);
+
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-hover: var(--accent-blue-hover);
+  --color-accent-blue-soft: var(--accent-blue-soft);
+
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-soft: var(--accent-green-soft);
+
+  --color-accent-red: var(--accent-red);
+  --color-accent-red-soft: var(--accent-red-soft);
+
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-orange-soft: var(--accent-orange-soft);
+
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-purple-soft: var(--accent-purple-soft);
+
+  --color-accent-pink: var(--accent-pink);
+  --color-accent-pink-soft: var(--accent-pink-soft);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  --font-sans: var(--font-arimo);
+  --font-mono: var(--font-jetbrains);
+}
+
+@layer base {
+  :root {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F7F7F5;
+    --bg-hover: #F1F1EF;
+    --bg-active: #EDEDEB;
+    --bg-elevated: #FFFFFF;
+
+    --border-default: #E8E8E3;
+    --border-light: #F0F0EC;
+
+    --text-primary: #1A1A1A;
+    --text-secondary: #6B6B6B;
+    --text-muted: #9B9B9B;
+    --text-placeholder: #B4B4B4;
+
+    --accent-blue: #2383E2;
+    --accent-blue-hover: #1B6EC2;
+    --accent-blue-soft: #E8F0FE;
+
+    --accent-green: #0F7B6C;
+    --accent-green-soft: #E6F5F0;
+
+    --accent-red: #E03E3E;
+    --accent-red-soft: #FDECEC;
+
+    --accent-orange: #D9730D;
+    --accent-orange-soft: #FBF3DB;
+
+    --accent-purple: #6940A5;
+    --accent-purple-soft: #F3EFFD;
+
+    --accent-pink: #AD1A72;
+    --accent-pink-soft: #FDEBF7;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-full: 9999px;
+  }
+
+  html.dark {
+    --bg-primary: #1A1A1A;
+    --bg-secondary: #242424;
+    --bg-hover: #2E2E2E;
+    --bg-active: #383838;
+    --bg-elevated: #242424;
+
+    --border-default: #3D3D3D;
+    --border-light: #333333;
+
+    --text-primary: #F5F5F5;
+    --text-secondary: #A3A3A3;
+    --text-muted: #737373;
+    --text-placeholder: #525252;
+
+    --accent-blue: #58A6FF;
+    --accent-blue-hover: #79B8FF;
+    --accent-blue-soft: #1E3A5F;
+
+    --accent-green: #3FB950;
+    --accent-green-soft: #1B3B2E;
+
+    --accent-red: #F85149;
+    --accent-red-soft: #4A2020;
+
+    --accent-orange: #D29922;
+    --accent-orange-soft: #3D3000;
+
+    --accent-purple: #A371F7;
+    --accent-purple-soft: #2D2340;
+
+    --accent-pink: #DB61A2;
+    --accent-pink-soft: #3D2035;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  /* Arimo is 15px by default for body text */
+  font-size: 15px;
+}
+
+/* ─── Custom Scrollbar ───────────────────────────────────────────────────── */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 99px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-placeholder);
+}
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+}
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── Block Editor Inline Formatting ─────────────────────────────────────── */
+
+/* Bold, italic, underline, strikethrough (from toolbar + shortcuts; persisted as HTML) */
+.block-content strong,
+.block-content b {
+  font-weight: 700;
+}
+.block-content em,
+.block-content i {
+  font-style: italic;
+}
+.block-content u {
+  text-decoration: underline;
+}
+.block-content s,
+.block-content strike {
+  text-decoration: line-through;
+}
+
+/* Inline code within contentEditable blocks */
+.block-content code,
+.block-content .inline-code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--accent-red);
+}
+
+/* Inline font (toolbar) */
+.block-content .inline-font-mono {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+/* Inline text color (toolbar) */
+.block-content .inline-color-muted { color: var(--text-muted); }
+.block-content .inline-color-blue { color: var(--accent-blue); }
+.block-content .inline-color-green { color: var(--accent-green); }
+.block-content .inline-color-red { color: var(--accent-red); }
+.block-content .inline-color-orange { color: var(--accent-orange); }
+.block-content .inline-color-purple { color: var(--accent-purple); }
+
+/* Inline highlight (toolbar) */
+.block-content .inline-highlight-yellow { background-color: rgba(250, 204, 21, 0.35); }
+.block-content .inline-highlight-green { background-color: rgba(34, 197, 94, 0.25); }
+.block-content .inline-highlight-blue { background-color: rgba(59, 130, 246, 0.25); }
+.block-content .inline-highlight-pink { background-color: rgba(236, 72, 153, 0.25); }
+html.dark .block-content .inline-highlight-yellow { background-color: rgba(250, 204, 21, 0.28); }
+html.dark .block-content .inline-highlight-green { background-color: rgba(34, 197, 94, 0.22); }
+html.dark .block-content .inline-highlight-blue { background-color: rgba(59, 130, 246, 0.22); }
+html.dark .block-content .inline-highlight-pink { background-color: rgba(236, 72, 153, 0.22); }
+
+/* Selection color in the editor */
+.block-content ::selection {
+  background: rgba(35, 131, 226, 0.18);
+}
+
+/* Placeholder via data-placeholder attribute */
+[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Ensure contentEditable doesn't show browser outline */
+[contenteditable]:focus {
+  outline: none;
+}
+
+/* Page title placeholder */
+.page-title-editable:empty::before {
+  content: 'Untitled';
+  color: var(--text-placeholder);
+  pointer-events: none;
+}
+
+/* Smooth caret color */
+[contenteditable] {
+  caret-color: var(--accent-blue);
+}
+
+@keyframes sporePopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pageContentEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-content-enter {
+  animation: pageContentEnter 0.2s ease-out forwards;
+}
