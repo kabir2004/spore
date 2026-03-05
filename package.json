@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "supabase db push",
+    "db:migrate-010": "node --env-file=.env.local scripts/run-migration-010.mjs",
     "db:seed": "node scripts/run-seed-api.mjs",
     "db:seed-accounts": "node --env-file=.env.local scripts/seed-accounts.mjs",
     "db:seed-demo": "node --env-file=.env.local scripts/seed-demo.mjs"
@@ -36,6 +37,7 @@
     "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pg": "^8.13.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
