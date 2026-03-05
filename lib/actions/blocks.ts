@@ -61,8 +61,7 @@ export async function createBlock(block: IBlock, workspaceId: string): Promise<v
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.from('blocks') as any).insert({
+    const { error } = await supabase.from('blocks').insert({
         id: block.id,
         workspace_id: workspaceId,
         type: block.type,
@@ -80,36 +79,23 @@ export async function createBlock(block: IBlock, workspaceId: string): Promise<v
 
 /**
  * Update a block's mutable fields.
- * Properties are merged (not replaced) to allow partial updates from any block type.
- * content, parent_id, and type can also be updated directly.
+ * Uses update_block_atomic() — a single Postgres RPC call that merges
+ * properties via JSONB || operator, eliminating the prior SELECT + UPDATE pattern.
  */
 export async function updateBlock(id: string, updates: Partial<IBlock>): Promise<void> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const patch: Record<string, unknown> = {
-        last_edited_time: Date.now(),
-        last_edited_by: user?.id ?? null,
-    };
+    const { error } = await supabase.rpc('update_block_atomic', {
+        block_id:      id,
+        patch:         updates.properties ?? null,
+        content_val:   updates.content   ?? null,
+        parent_id_val: updates.parent_id ?? null,
+        type_val:      updates.type      ?? null,
+        edit_time:     Date.now(),
+        editor_id:     user?.id          ?? null,
+    });
 
-    if (updates.properties !== undefined) {
-        // Shallow-merge properties so callers can do partial property updates
-        const { data: existing } = await supabase
-            .from('blocks')
-            .select('properties')
-            .eq('id', id)
-            .single();
-        const existingRow = existing as { properties?: Record<string, unknown> } | null;
-        patch.properties = {
-            ...(existingRow?.properties ?? {}),
-            ...updates.properties,
-        };
-    }
-    if (updates.content !== undefined)   patch.content   = updates.content;
-    if (updates.parent_id !== undefined) patch.parent_id = updates.parent_id;
-    if (updates.type !== undefined)      patch.type      = updates.type;
-
-    const { error } = await (supabase.from('blocks') as any).update(patch).eq('id', id);
     if (error) throw new Error(`updateBlock failed: ${error.message}`);
 }
 
@@ -120,16 +106,15 @@ export async function updateBlock(id: string, updates: Partial<IBlock>): Promise
 export async function deleteBlock(id: string): Promise<void> {
     const supabase = await createClient();
 
-    // Collect all descendant IDs via recursive CTE
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: descendants, error: fnError } = await (supabase.rpc as any)('get_block_descendants', { root_id: id });
+    const { data: descendants, error: fnError } = await supabase.rpc('get_block_descendants', { root_id: id });
 
     if (fnError) throw new Error(`deleteBlock descendant fetch failed: ${fnError.message}`);
 
     const ids = [id, ...(descendants ?? []).map((r: { id: string }) => r.id)];
     const now = new Date().toISOString();
 
-    const { error } = await (supabase.from('blocks') as any)
+    const { error } = await supabase
+        .from('blocks')
         .update({ is_deleted: true, deleted_at: now })
         .in('id', ids);
 
@@ -144,7 +129,8 @@ export async function reorderBlocks(parentId: string, newChildOrder: string[]): 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error } = await (supabase.from('blocks') as any)
+    const { error } = await supabase
+        .from('blocks')
         .update({
             content: newChildOrder,
             last_edited_time: Date.now(),

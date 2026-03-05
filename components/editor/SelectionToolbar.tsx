@@ -8,6 +8,13 @@ import { useDocumentSelectAll, dispatchApplyFormatToAll } from '@/lib/context/Do
 
 const SAVE_BLOCK_EVENT = 'spore-save-block';
 
+// execCommand / queryCommandState are spec-deprecated but remain the only reliable
+// contentEditable formatting APIs. Neither will be removed from browsers.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const doc = document as any;
+const execFormat = (cmd: string) => doc.execCommand(cmd, false);
+const queryFormat = (cmd: string): boolean => doc.queryCommandState(cmd);
+
 const TOOLBAR_HEIGHT = 40;
 const TOOLBAR_OFFSET = 12;
 const TOOLBAR_WIDTH = 380;
@@ -46,10 +53,10 @@ export function SelectionToolbar() {
     }, [documentSelectAll]);
 
     const readCommandState = (): Pick<ToolbarState, 'isBold' | 'isItalic' | 'isUnderline' | 'isStrike'> => ({
-        isBold: document.queryCommandState('bold'),
-        isItalic: document.queryCommandState('italic'),
-        isUnderline: document.queryCommandState('underline'),
-        isStrike: document.queryCommandState('strikeThrough'),
+        isBold: queryFormat('bold'),
+        isItalic: queryFormat('italic'),
+        isUnderline: queryFormat('underline'),
+        isStrike: queryFormat('strikeThrough'),
     });
 
     const getEditableFromSelection = (): HTMLElement | null => {
@@ -148,7 +155,7 @@ export function SelectionToolbar() {
         // Save range so we can restore after execCommand (some browsers collapse selection)
         const range = selection.getRangeAt(0).cloneRange();
 
-        document.execCommand(command, false);
+        execFormat(command);
 
         // Restore selection so user keeps formatting context and toolbar state updates
         try {

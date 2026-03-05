@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useWorkspaceStore } from '@/lib/store/workspaceStore';
 import { IBlock } from '@/lib/types/block';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import {
     Check, GripVertical, Plus, ChevronRight, Copy, ExternalLink,
     ImageIcon, Video, Music, Paperclip, Globe, Bookmark,
@@ -86,10 +87,15 @@ interface EditableDivProps {
     className?: string;
     placeholder?: string;
     onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-    onInput?: (e: React.FormEvent<HTMLDivElement>) => void;
+    onInput?: (e: React.SyntheticEvent<HTMLDivElement>) => void;
 }
 
 const SAVE_BLOCK_EVENT = 'spore-save-block';
+
+// document.execCommand is spec-deprecated but remains the only reliable cross-browser
+// API for contentEditable rich-text formatting. It will not be removed from browsers.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const execFormat = (cmd: string) => (document as any).execCommand(cmd);
 
 const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
     ({ blockId, html, onSave, className, placeholder, onKeyDown, onInput }, forwardedRef) => {
@@ -111,7 +117,7 @@ const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
             const el = innerRef.current;
             if (!el) return;
             const handleSave = () => {
-                onSaveRef.current(el.innerHTML);
+                onSaveRef.current(sanitizeHtml(el.innerHTML));
             };
             el.addEventListener(SAVE_BLOCK_EVENT, handleSave);
             return () => el.removeEventListener(SAVE_BLOCK_EVENT, handleSave);
@@ -120,9 +126,9 @@ const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
         return (
             <div
                 ref={(node) => {
-                    (innerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+                    (innerRef as React.RefObject<HTMLDivElement | null>).current = node;
                     if (typeof forwardedRef === 'function') forwardedRef(node);
-                    else if (forwardedRef) (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+                    else if (forwardedRef) (forwardedRef as React.RefObject<HTMLDivElement | null>).current = node;
                 }}
                 id={blockId}
                 contentEditable
@@ -132,7 +138,7 @@ const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
                 data-placeholder={placeholder}
                 onKeyDown={onKeyDown}
                 onInput={onInput}
-                onBlur={e => onSave(e.currentTarget.innerHTML)}
+                onBlur={e => onSave(sanitizeHtml(e.currentTarget.innerHTML))}
             />
         );
     }
@@ -437,7 +443,7 @@ const EmbedBlock = ({
                     src={block.properties.url}
                     className="w-full border-0"
                     style={{ height: 400 }}
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                    sandbox="allow-scripts allow-popups allow-forms"
                     loading="lazy"
                     title="Embedded content"
                 />
@@ -596,9 +602,11 @@ const focusBlockEnd = (id: string) => {
 
 // ─── Main BlockRenderer ───────────────────────────────────────────────────────
 
-export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0, dragHandleProps }) => {
+const BlockRendererInner: React.FC<BlockRendererProps> = ({ blockId, depth = 0, dragHandleProps }) => {
     const block = useWorkspaceStore((state) => state.blocks[blockId]);
-    const blocks = useWorkspaceStore((state) => state.blocks);
+    // Do NOT subscribe to the full blocks map — use getState() for point-in-time reads
+    // so that edits to sibling blocks don't re-render this component.
+    const getBlocks = () => useWorkspaceStore.getState().blocks;
     const updateBlock = useWorkspaceStore((state) => state.updateBlock);
     const addBlock = useWorkspaceStore((state) => state.addBlock);
     const deleteBlock = useWorkspaceStore((state) => state.deleteBlock);
@@ -669,10 +677,10 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
         if (e.metaKey || e.ctrlKey) {
             const el = e.currentTarget as HTMLElement;
             const persist = () => el.dispatchEvent(new CustomEvent(SAVE_BLOCK_EVENT, { bubbles: false }));
-            if (e.key === 'b') { e.preventDefault(); document.execCommand('bold'); persist(); return; }
-            if (e.key === 'i') { e.preventDefault(); document.execCommand('italic'); persist(); return; }
-            if (e.key === 'u') { e.preventDefault(); document.execCommand('underline'); persist(); return; }
-            if (e.key === 'e') { e.preventDefault(); document.execCommand('strikeThrough'); persist(); return; }
+            if (e.key === 'b') { e.preventDefault(); execFormat('bold'); persist(); return; }
+            if (e.key === 'i') { e.preventDefault(); execFormat('italic'); persist(); return; }
+            if (e.key === 'u') { e.preventDefault(); execFormat('underline'); persist(); return; }
+            if (e.key === 'e') { e.preventDefault(); execFormat('strikeThrough'); persist(); return; }
         }
 
         // ── Tab / Shift+Tab: indent / outdent list items ──────────────────────────
@@ -683,7 +691,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
 
             if (e.shiftKey) {
                 // Outdent: lift block up to grandparent level, placed after current parent
-                const parent = blocks[block.parent_id];
+                const parent = getBlocks()[block.parent_id];
                 if (!parent || !parent.parent_id) return;
                 const freshParent = useWorkspaceStore.getState().blocks[parent.id];
                 const freshGrandparent = useWorkspaceStore.getState().blocks[parent.parent_id];
@@ -748,7 +756,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
                 }
                 // Otherwise delete the block and focus previous
                 e.preventDefault();
-                const parent = blocks[block.parent_id];
+                const parent = getBlocks()[block.parent_id];
                 if (parent) {
                     const content = parent.content ?? [];
                     const idx = content.indexOf(block.id);
@@ -790,7 +798,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
     // ── Input handler — markdown shortcuts ────────────────────────────────────
     // Only fires on text blocks. Detects prefix patterns (# , - , 1. , etc.)
     // typed at the start of an empty block and converts the block type in-place.
-    const handleInput = (e: React.FormEvent<HTMLElement>) => {
+    const handleInput = (e: React.SyntheticEvent<HTMLElement>) => {
         const el = e.currentTarget as HTMLElement;
         if (block.type !== 'text') return;
 
@@ -862,8 +870,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
 
     // ── Children renderer ──────────────────────────────────────────────────────
     const renderChildren = () => {
+        const allBlocks = getBlocks();
         const content = block.content ?? [];
-        const validIds = content.filter((id) => blocks[id]);
+        const validIds = content.filter((id) => allBlocks[id]);
         if (validIds.length === 0) return null;
         return (
             <div className={cn('flex flex-col', depth > 0 && 'ml-6')}>
@@ -877,11 +886,12 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
     // ── Numbered list index ────────────────────────────────────────────────────
     const getNumberedIndex = (): number => {
         if (!block.parent_id) return 1;
-        const parentContent = blocks[block.parent_id]?.content ?? [];
+        const allBlocks = getBlocks();
+        const parentContent = allBlocks[block.parent_id]?.content ?? [];
         const myIdx = parentContent.indexOf(block.id);
         let num = 0;
         for (let i = 0; i <= myIdx; i++) {
-            if (blocks[parentContent[i]]?.type === 'numbered_list_item') num++;
+            if (allBlocks[parentContent[i]]?.type === 'numbered_list_item') num++;
         }
         return num;
     };
@@ -890,7 +900,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
     const editableBase = (placeholder?: string) => ({
         blockId: block.id,
         html: block.properties.text || '',
-        onSave: (html: string) => updateBlock(block.id, { properties: { text: html } }),
+        onSave: (html: string) => updateBlock(block.id, { properties: { text: sanitizeHtml(html) } }),
         placeholder,
         onKeyDown: handleKeyDown,
         onInput: handleInput,
@@ -1288,3 +1298,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, depth = 0
         </React.Fragment>
     );
 };
+
+// Wrap in React.memo so that a block only re-renders when ITS OWN data changes,
+// not when any other block in the workspace is edited.
+export const BlockRenderer = React.memo(BlockRendererInner);

@@ -70,9 +70,9 @@ const MOCK_EMAILS: Email[] = [
         id: 'e2',
         from: 'GitHub',
         fromEmail: 'noreply@github.com',
-        subject: '[aurora] Deployment failed on main',
+        subject: '[spore] Deployment failed on main',
         preview: 'Your deployment for commit abc1234 on the main branch has failed. Click to view the full build log.',
-        body: `Your recent deployment has failed.\n\nRepository: aurora-app/aurora\nBranch: main\nCommit: abc1234f — "feat: add real-time block sync"\nTriggered by: kabir\n\nError:\n  Build failed at step "npm run build"\n  Exit code: 1\n  Error: Type error in components/editor/BlockRenderer.tsx\n  TS2339: Property 'open' does not exist on type 'BlockProperties'\n\nView full logs → github.com/aurora-app/aurora/actions/runs/12345\n\n—\nYou are receiving this because you are subscribed to deployment notifications.`,
+        body: `Your recent deployment has failed.\n\nRepository: spore-app/spore\nBranch: main\nCommit: abc1234f — "feat: add real-time block sync"\nTriggered by: kabir\n\nError:\n  Build failed at step "npm run build"\n  Exit code: 1\n  Error: Type error in components/editor/BlockRenderer.tsx\n  TS2339: Property 'open' does not exist on type 'BlockProperties'\n\nView full logs → github.com/spore-app/spore/actions/runs/12345\n\n—\nYou are receiving this because you are subscribed to deployment notifications.`,
         date: '09:12 AM',
         unread: true,
         starred: false,
@@ -205,7 +205,7 @@ function OAuthModal({ provider, onConnected, onClose }: {
                         <div className="flex flex-col gap-4">
                             <div>
                                 <p className="text-[13.5px] font-medium text-text-primary mb-1">
-                                    aurora wants access to your {config.name} account
+                                    spore wants access to your {config.name} account
                                 </p>
                                 <p className="text-[12.5px] text-text-muted">{email}</p>
                             </div>
@@ -415,7 +415,7 @@ export function InboxPage() {
                             Connect your inbox
                         </h1>
                         <p className="text-[14px] text-text-secondary mb-8 leading-relaxed">
-                            Connect Gmail or Outlook to see all your messages directly in aurora.
+                            Connect Gmail or Outlook to see all your messages directly in spore.
                         </p>
                         <div className="flex flex-col w-full gap-3">
                             <button

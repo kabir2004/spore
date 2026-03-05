@@ -8,9 +8,9 @@
  * Run: npm run db:seed-accounts   or   node scripts/seed-accounts.mjs
  *
  * Creates:
- *   - admin@aurora.local  / password: AuroraAdmin1!
- *   - user@aurora.local   / password: AuroraUser1!   (your main account)
- *   - test@aurora.local   / password: AuroraTest1!
+ *   - admin@spore.local  / password: sporeAdmin1!
+ *   - user@spore.local   / password: sporeUser1!   (your main account)
+ *   - test@spore.local   / password: sporeTest1!
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -49,9 +49,9 @@ const supabase = createClient(url, serviceRoleKey, {
 });
 
 const accounts = [
-    { email: 'admin@aurora.local', password: 'AuroraAdmin1!', fullName: 'Aurora Admin', accountRole: 'admin', slug: 'admin' },
-    { email: 'user@aurora.local', password: 'AuroraUser1!', fullName: 'Aurora User', accountRole: 'user', slug: 'user' },
-    { email: 'test@aurora.local', password: 'AuroraTest1!', fullName: 'Aurora Test', accountRole: 'test', slug: 'test' },
+    { email: 'admin@spore.local', password: 'sporeAdmin1!', fullName: 'spore Admin', accountRole: 'admin', slug: 'admin' },
+    { email: 'user@spore.local', password: 'sporeUser1!', fullName: 'spore User', accountRole: 'user', slug: 'user' },
+    { email: 'test@spore.local', password: 'sporeTest1!', fullName: 'spore Test', accountRole: 'test', slug: 'test' },
 ];
 
 function slugFromEmail(email) {
@@ -149,9 +149,9 @@ async function main() {
         await ensureAccount(account);
     }
     console.log('\nDone. You can sign in with:');
-    console.log('  Admin:  admin@aurora.local  / AuroraAdmin1!');
-    console.log('  User:   user@aurora.local  / AuroraUser1!');
-    console.log('  Test:   test@aurora.local  / AuroraTest1!');
+    console.log('  Admin:  admin@spore.local  / sporeAdmin1!');
+    console.log('  User:   user@spore.local  / sporeUser1!');
+    console.log('  Test:   test@spore.local  / sporeTest1!');
 }
 
 main().catch((e) => {

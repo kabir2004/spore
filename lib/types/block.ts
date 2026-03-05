@@ -42,6 +42,7 @@ export interface PageField {
 }
 
 export interface BlockProperties {
+    [key: string]: unknown;
     // Page
     title?: string;
     icon?: string;

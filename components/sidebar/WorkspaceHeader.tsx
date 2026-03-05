@@ -67,7 +67,7 @@ export function WorkspaceHeader() {
                     onClick={() => { setDropdownOpen(v => !v); setShowCreate(false); setNewName(''); }}
                     className="flex-1 min-w-0 flex items-center gap-2 hover:bg-bg-hover cursor-pointer transition-colors rounded-md py-1 -mx-1 px-1"
                 >
-                    <div className="w-6 h-6 flex items-center justify-center shrink-0 rounded-md overflow-hidden bg-bg-elevated border border-border-default" title="aurora">
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0 rounded-md overflow-hidden bg-bg-elevated border border-border-default" title="spore">
                         <AppLogo size={20} className="object-contain" />
                     </div>
                     <span className="font-semibold text-text-primary text-[13.5px] flex-1 truncate text-left">

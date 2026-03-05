@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -16,6 +17,7 @@ import {
     type ApplyFormatToAllDetail,
 } from '@/lib/context/DocumentSelectAllContext';
 import { FONT_OPTIONS, TEXT_COLOR_OPTIONS, HIGHLIGHT_COLOR_OPTIONS } from '@/lib/editor/formatOptions';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 
 const focusBlockEnd = (id: string) => {
     const el = document.getElementById(id);
@@ -35,11 +37,18 @@ export const BlockEditor = ({ rootBlockId }: { rootBlockId: string }) => {
     const params = useParams();
     const slug = (params?.workspaceSlug as string) || 'kabir';
     const rootBlock = useWorkspaceStore((state) => state.blocks[rootBlockId]);
-    const blocks = useWorkspaceStore((state) => state.blocks);
     const updateBlock = useWorkspaceStore((state) => state.updateBlock);
     const addBlock = useWorkspaceStore((state) => state.addBlock);
 
-    const contentIds = (rootBlock?.content ?? []).filter((id) => blocks[id]);
+    // Granular selector: only re-render when the set of valid child IDs changes.
+    // This avoids re-rendering BlockEditor (and all its children) on every keystroke
+    // in any block elsewhere in the document.
+    const contentIds = useWorkspaceStore(
+        useShallow((state) => {
+            const content = state.blocks[rootBlockId]?.content ?? [];
+            return content.filter((id) => !!state.blocks[id]);
+        })
+    );
     const titleRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -142,7 +151,7 @@ export const BlockEditor = ({ rootBlockId }: { rootBlockId: string }) => {
                     const nextProps = current?.properties ? { ...current.properties, title: el.textContent || '' } : { title: el.textContent || '' };
                     updateBlock(rootBlockId, { properties: nextProps });
                 } else {
-                    updateBlock(blockId, { properties: { text: el.innerHTML } });
+                    updateBlock(blockId, { properties: { text: sanitizeHtml(el.innerHTML) } });
                 }
             };
 

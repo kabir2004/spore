@@ -40,6 +40,28 @@ function slugFromEmail(email: string): string {
 }
 
 /**
+ * Returns a workspace slug that is guaranteed to be unique in the DB.
+ * If the base slug is taken, appends a random 4-char suffix and retries.
+ * e.g. "john" → "john" (if free) or "john-a3f7" (if taken).
+ */
+async function uniqueSlug(supabase: Awaited<ReturnType<typeof import('@/lib/supabase/server').createClient>>, base: string): Promise<string> {
+    let candidate = base;
+    for (let attempt = 0; attempt < 10; attempt++) {
+        const { data } = await supabase
+            .from('workspaces')
+            .select('id')
+            .eq('slug', candidate)
+            .maybeSingle();
+        if (!data) return candidate;
+        // Collision — append a random 4-char hex suffix
+        const suffix = Math.random().toString(16).slice(2, 6);
+        candidate = `${base.slice(0, 25)}-${suffix}`;
+    }
+    // Extremely unlikely fallback
+    return `ws-${Math.random().toString(16).slice(2, 10)}`;
+}
+
+/**
  * Sign up a new user. On success:
  *  - Creates their Supabase auth account
  *  - Creates a workspace + root block in the DB (unless email confirmation is required)
@@ -76,14 +98,13 @@ export async function signUp(
     }
 
     const userId = data.user.id;
-    const slug = slugFromEmail(email);
+    const slug = await uniqueSlug(supabase, slugFromEmail(email));
     const workspaceId = uuidv4();
     const rootId = uuidv4();
     const now = Date.now();
 
     // Insert workspace
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: wsError } = await (supabase.from('workspaces') as any).insert({
+    const { error: wsError } = await supabase.from('workspaces').insert({
         id: workspaceId,
         name: `${fullName || email}'s Workspace`,
         slug,
@@ -93,8 +114,7 @@ export async function signUp(
     if (wsError) return { error: getAuthErrorMessage(wsError.message) };
 
     // Insert owner membership
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: memberError } = await (supabase.from('workspace_members') as any).insert({
+    const { error: memberError } = await supabase.from('workspace_members').insert({
         workspace_id: workspaceId,
         user_id: userId,
         role: 'owner',
@@ -102,8 +122,7 @@ export async function signUp(
     if (memberError) return { error: getAuthErrorMessage(memberError.message) };
 
     // Insert root page block
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: blockError } = await (supabase.from('blocks') as any).insert({
+    const { error: blockError } = await supabase.from('blocks').insert({
         id: rootId,
         workspace_id: workspaceId,
         type: 'page',
@@ -241,12 +260,12 @@ export async function ensureWorkspaceForCurrentUser(): Promise<{ error: string }
 
     const fullName = user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'User';
     const email = user.email ?? '';
-    const slug = slugFromEmail(email);
+    const slug = await uniqueSlug(supabase, slugFromEmail(email));
     const workspaceId = uuidv4();
     const rootId = uuidv4();
     const now = Date.now();
 
-    const { error: wsError } = await (supabase.from('workspaces') as any).insert({
+    const { error: wsError } = await supabase.from('workspaces').insert({
         id: workspaceId,
         name: `${fullName}'s Workspace`,
         slug,
@@ -255,14 +274,14 @@ export async function ensureWorkspaceForCurrentUser(): Promise<{ error: string }
     });
     if (wsError) return { error: getAuthErrorMessage(wsError.message) };
 
-    const { error: memberError } = await (supabase.from('workspace_members') as any).insert({
+    const { error: memberError } = await supabase.from('workspace_members').insert({
         workspace_id: workspaceId,
         user_id: user.id,
         role: 'owner',
     });
     if (memberError) return { error: getAuthErrorMessage(memberError.message) };
 
-    const { error: blockError } = await (supabase.from('blocks') as any).insert({
+    const { error: blockError } = await supabase.from('blocks').insert({
         id: rootId,
         workspace_id: workspaceId,
         type: 'page',
@@ -296,14 +315,10 @@ export async function createDemoAccounts(): Promise<{ error: string } | { messag
     const { v4: uuidv4 } = await import('uuid');
 
     const accounts = [
-        { email: 'admin@aurora.local', password: 'AuroraAdmin1!', fullName: 'Aurora Admin', accountRole: 'admin', slug: 'admin' },
-        { email: 'user@aurora.local', password: 'AuroraUser1!', fullName: 'Aurora User', accountRole: 'user', slug: 'user' },
-        { email: 'test@aurora.local', password: 'AuroraTest1!', fullName: 'Aurora Test', accountRole: 'test', slug: 'test' },
+        { email: 'admin@spore.local', password: 'sporeAdmin1!', fullName: 'spore Admin', accountRole: 'admin', slug: 'admin' },
+        { email: 'user@spore.local', password: 'sporeUser1!', fullName: 'spore User', accountRole: 'user', slug: 'user' },
+        { email: 'test@spore.local', password: 'sporeTest1!', fullName: 'spore Test', accountRole: 'test', slug: 'test' },
     ];
-
-    function slugFromEmail(email: string) {
-        return email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 30) || 'workspace';
-    }
 
     for (const { email, password, fullName, accountRole, slug } of accounts) {
         const { data: listData } = await supabase.auth.admin.listUsers();
@@ -329,9 +344,7 @@ export async function createDemoAccounts(): Promise<{ error: string } | { messag
         const workspaceId = uuidv4();
         const rootId = uuidv4();
         const now = Date.now();
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: wsErr } = await (supabase.from('workspaces') as any).insert({
+        const { error: wsErr } = await supabase.from('workspaces').insert({
             id: workspaceId,
             name: `${fullName}'s Workspace`,
             slug,
@@ -339,17 +352,13 @@ export async function createDemoAccounts(): Promise<{ error: string } | { messag
             owner_id: userId,
         });
         if (wsErr) return { error: `Workspace failed for ${email}: ${wsErr.message}` };
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: memberErr } = await (supabase.from('workspace_members') as any).insert({
+        const { error: memberErr } = await supabase.from('workspace_members').insert({
             workspace_id: workspaceId,
             user_id: userId,
             role: 'owner',
         });
         if (memberErr) return { error: `Member failed for ${email}: ${memberErr.message}` };
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: blockErr } = await (supabase.from('blocks') as any).insert({
+        const { error: blockErr } = await supabase.from('blocks').insert({
             id: rootId,
             workspace_id: workspaceId,
             type: 'page',
@@ -364,5 +373,5 @@ export async function createDemoAccounts(): Promise<{ error: string } | { messag
         if (blockErr) return { error: `Block failed for ${email}: ${blockErr.message}` };
     }
 
-    return { message: 'Demo accounts ready. Sign in with user@aurora.local / AuroraUser1!' };
+    return { message: 'Demo accounts ready. Sign in with user@spore.local / sporeUser1!' };
 }

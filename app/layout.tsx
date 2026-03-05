@@ -15,7 +15,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "aurora — Your AI workspace",
+  title: "spore — Your AI workspace",
   description: "Notes, mail, meetings — unified.",
 };
 

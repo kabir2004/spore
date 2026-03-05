@@ -10,19 +10,19 @@ interface AppLogoProps {
 }
 
 /**
- * aurora app logo — correct icon per theme:
- * - Light theme → auroralighticon.png (black icon, for light backgrounds)
- * - Dark theme  → auroradarkicon.png  (white icon, for dark backgrounds)
+ * spore app logo — correct icon per theme:
+ * - Light theme → sporelighticon.png (black icon, for light backgrounds)
+ * - Dark theme  → sporedarkicon.png  (white icon, for dark backgrounds)
  */
 export function AppLogo({ size = 24, className }: AppLogoProps) {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
-    const src = isDark ? '/auroradarkicon.png' : '/auroralighticon.png';
+    const src = isDark ? '/sporedarkicon.png' : '/sporelighticon.png';
 
     return (
         <img
             src={src}
-            alt="aurora"
+            alt="spore"
             width={size}
             height={size}
             className={cn('shrink-0 object-contain', className)}

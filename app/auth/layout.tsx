@@ -27,7 +27,7 @@ export default function AuthRouteLayout({
                     <div className="w-8 h-8 flex items-center justify-center rounded-lg overflow-hidden bg-bg-elevated border border-border-default shrink-0">
                         <AppLogo size={28} className="object-contain" />
                     </div>
-                    <span className="font-bold tracking-tight text-[18px]">aurora</span>
+                    <span className="font-bold tracking-tight text-[18px]">spore</span>
                 </Link>
             </header>
             <main className="flex-1 flex flex-col items-center justify-center p-6 relative z-0">

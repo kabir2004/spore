@@ -263,7 +263,7 @@ const mockInitialState: Record<string, IBlock> = {
     'ds-intro': {
         id: 'ds-intro',
         type: 'text',
-        properties: { text: 'aurora\'s design system is the single source of truth for how we build consistent, accessible, and beautiful interfaces. Every decision is documented here.' },
+        properties: { text: 'spore\'s design system is the single source of truth for how we build consistent, accessible, and beautiful interfaces. Every decision is documented here.' },
         content: [],
         parent_id: 'page-2',
         created_time: T + 5100,
@@ -807,7 +807,7 @@ case 'my_new_type':
     'q3-intro': {
         id: 'q3-intro',
         type: 'text',
-        properties: { text: 'Q3 runs July 1 – September 30, 2026. Our north star: make aurora the undisputed best tool for async team collaboration.' },
+        properties: { text: 'Q3 runs July 1 – September 30, 2026. Our north star: make spore the undisputed best tool for async team collaboration.' },
         content: [],
         parent_id: 'page-4',
         created_time: T + 9100,

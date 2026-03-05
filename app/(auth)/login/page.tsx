@@ -76,7 +76,7 @@ function LoginForm() {
                 Welcome back
             </h1>
             <p className="text-[14px] text-text-secondary mb-6">
-                Sign in to your aurora workspace.
+                Sign in to your spore workspace.
             </p>
 
             {error && (

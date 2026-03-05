@@ -11,9 +11,9 @@ function Nav() {
         >
             <Link href="/" className="flex items-center gap-2.5 shrink-0">
                 <div className="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] bg-[#FAFAF9] border border-[#E8E8E3] overflow-hidden shadow-sm shrink-0">
-                    <Image src="/auroralighticon.png" alt="aurora" width={22} height={22} className="object-contain" />
+                    <Image src="/sporelighticon.png" alt="spore" width={22} height={22} className="object-contain" />
                 </div>
-                <span className="text-[17px] font-semibold text-[#0A0A0A] tracking-[-0.4px]">aurora</span>
+                <span className="text-[17px] font-semibold text-[#0A0A0A] tracking-[-0.4px]">spore</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
@@ -52,7 +52,7 @@ function Hero() {
             </h1>
 
             <p className="text-[16px] text-[#5C5C5C] max-w-[420px] leading-[1.6] mb-9 tracking-[-0.1px]">
-                Notes, meetings, and decisions — connected. Context stays where it belongs.
+                Notes, meetings, and decisions → connected. Context stays where it belongs.
             </p>
 
             <div className="flex items-center gap-3">
@@ -69,122 +69,16 @@ function Hero() {
                 </Link>
             </div>
 
-            {/* Product preview */}
-            <div className="mt-16 w-full max-w-[960px] rounded-[14px] border border-[#E8E8E3] shadow-[0_2px_24px_rgba(0,0,0,0.06)] overflow-hidden">
-                {/* Chrome */}
-                <div className="flex items-center gap-2 px-4 h-10 border-b border-[#F0F0EC]" style={{ background: '#FAFAF9' }}>
-                    <div className="flex gap-[5px]">
-                        {['#E0E0DC', '#E0E0DC', '#E0E0DC'].map((c, i) => (
-                            <div key={i} className="w-[11px] h-[11px] rounded-full" style={{ background: c }} />
-                        ))}
-                    </div>
-                    <div className="flex-1 flex justify-center">
-                        <div className="flex items-center gap-1.5 px-4 h-[22px] rounded-[5px] text-[11px] text-[#ADADAD]" style={{ background: '#F0F0EC' }}>
-                            aurora.app
-                        </div>
-                    </div>
-                </div>
-
-                {/* App layout */}
-                <div className="flex" style={{ height: '420px', background: '#FFFFFF' }}>
-                    {/* Sidebar */}
-                    <div className="w-[220px] shrink-0 border-r border-[#F0F0EC] flex flex-col p-3 gap-0.5" style={{ background: '#F7F7F5' }}>
-                        <div className="flex items-center gap-2 px-2 py-1.5 mb-2">
-                            <div className="w-5 h-5 rounded-[5px] bg-[#0A0A0A] flex items-center justify-center shrink-0">
-                                <div className="w-2.5 h-2.5 rounded-[2px] bg-white opacity-80" />
-                            </div>
-                            <div className="h-2.5 w-20 rounded-[3px]" style={{ background: '#D8D8D4' }} />
-                        </div>
-
-                        {/* Nav items */}
-                        {[['Home', true], ['Inbox', false], ['Meetings', false], ['Calendar', false]].map(([label, active]) => (
-                            <div key={label as string}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded-[6px]"
-                                style={{ background: active ? '#EDEDEB' : 'transparent' }}
-                            >
-                                <div className="w-3.5 h-3.5 rounded-[3px]" style={{ background: active ? '#B4B4B0' : '#D4D4CF' }} />
-                                <div className="h-2.5 rounded-[3px]" style={{ width: `${45 + (label as string).length * 4}px`, background: active ? '#ADADAA' : '#DDDDD8' }} />
-                            </div>
-                        ))}
-
-                        <div className="mt-4 mb-1 px-2">
-                            <div className="h-[1px] bg-[#EAEAE6]" />
-                        </div>
-                        <div className="px-2 py-1">
-                            <div className="h-2 w-10 rounded-[3px]" style={{ background: '#DDDDD8' }} />
-                        </div>
-
-                        {/* Pages list */}
-                        {[88, 72, 96, 64, 80].map((w, i) => (
-                            <div key={i} className="flex items-center gap-2 px-2 py-[5px]">
-                                <div className="w-3 h-3 rounded-[2px]" style={{ background: '#E4E4E0' }} />
-                                <div className="h-2.5 rounded-[3px]" style={{ width: `${w}px`, background: '#E8E8E3' }} />
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Main content */}
-                    <div className="flex-1 flex flex-col">
-                        {/* Topbar */}
-                        <div className="flex items-center justify-between px-8 h-10 border-b border-[#F0F0EC] shrink-0">
-                            <div className="flex items-center gap-1.5">
-                                <div className="h-2.5 w-8 rounded-[3px]" style={{ background: '#E8E8E3' }} />
-                                <div className="h-2 w-2 rounded-full" style={{ background: '#DDDDD8' }} />
-                                <div className="h-2.5 w-20 rounded-[3px]" style={{ background: '#E0E0DC' }} />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="h-6 w-16 rounded-[5px]" style={{ background: '#F0F0EC' }} />
-                                <div className="w-6 h-6 rounded-full" style={{ background: '#E0E0DC' }} />
-                            </div>
-                        </div>
-
-                        {/* Editor */}
-                        <div className="flex-1 px-12 py-8 overflow-hidden">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="text-[22px] leading-none select-none">📋</div>
-                                <div className="h-3 w-12 rounded-[3px]" style={{ background: '#ECECEA' }} />
-                            </div>
-                            <div className="h-[38px] w-[340px] rounded-[5px] mb-7" style={{ background: '#0A0A0A', opacity: 0.07 }} />
-
-                            <div className="flex flex-col gap-3 max-w-[540px]">
-                                <div className="h-3 rounded-[3px]" style={{ width: '100%', background: '#EAEAE6' }} />
-                                <div className="h-3 rounded-[3px]" style={{ width: '88%', background: '#EAEAE6' }} />
-                                <div className="h-3 rounded-[3px]" style={{ width: '94%', background: '#EAEAE6' }} />
-
-                                <div className="mt-1 flex flex-col gap-2.5">
-                                    {[
-                                        { checked: false, w: 200 },
-                                        { checked: true, w: 240 },
-                                        { checked: false, w: 180 },
-                                    ].map(({ checked, w }, i) => (
-                                        <div key={i} className="flex items-center gap-2.5">
-                                            <div className="w-[14px] h-[14px] rounded-[3px] shrink-0 flex items-center justify-center"
-                                                style={{ border: checked ? 'none' : '1.5px solid #C8C8C4', background: checked ? '#0F7B6C' : 'transparent' }}
-                                            >
-                                                {checked && (
-                                                    <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                                                        <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                                    </svg>
-                                                )}
-                                            </div>
-                                            <div className="h-2.5 rounded-[3px]" style={{ width: `${w}px`, background: checked ? '#D8D8D4' : '#E8E8E3', opacity: checked ? 0.5 : 1 }} />
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="mt-2 p-3.5 rounded-[8px]" style={{ background: '#EEF4FD', border: '1px solid #D0E3F8' }}>
-                                    <div className="flex gap-2.5 items-start">
-                                        <div className="text-[13px] leading-none mt-0.5 select-none">💡</div>
-                                        <div className="flex flex-col gap-1.5 flex-1">
-                                            <div className="h-2.5 w-28 rounded-[3px]" style={{ background: '#A8C4E8' }} />
-                                            <div className="h-2.5 rounded-[3px]" style={{ width: '90%', background: '#B8D0EC' }} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Product screenshot */}
+            <div className="mt-16 w-full max-w-[960px] rounded-[14px] overflow-hidden border border-[#E8E8E3]" style={{ transform: 'translateZ(0)' }}>
+                <Image
+                    src="/landingpageimage6.png"
+                    alt="spore workspace"
+                    width={1920}
+                    height={1080}
+                    className="w-full h-auto block"
+                    priority
+                />
             </div>
         </section>
     );
@@ -197,7 +91,7 @@ function FeatureRows() {
         {
             index: '01',
             title: 'Write anything, structured.',
-            body: 'A block-based editor that handles text, code, tables, callouts, equations, and embedded media — all in one canvas. Structure appears as you write, not after.',
+            body: 'A block-based editor that handles text, code, tables, callouts, equations, and embedded media → all in one canvas. Structure appears as you write, not after.',
         },
         {
             index: '02',
@@ -207,7 +101,7 @@ function FeatureRows() {
         {
             index: '03',
             title: 'The whole team, one source.',
-            body: 'Real-time sync keeps every collaborator on the same version. Granular permissions let you share exactly what you intend — nothing more.',
+            body: 'Real-time sync keeps every collaborator on the same version. Granular permissions let you share exactly what you intend → nothing more.',
         },
     ];
 
@@ -254,11 +148,11 @@ function Features() {
                         Everything in one place.
                     </h2>
                     <p className="text-[15px] text-[#6B6B6B] mt-3 max-w-[400px] leading-[1.6]">
-                        Notes, meetings, AI, and contracts — built to work together.
+                        Notes, meetings, AI, and contracts → built to work together.
                     </p>
                 </div>
 
-                {/* gridAutoRows: each row exactly 245px — all same-row cards identical height */}
+                {/* gridAutoRows: each row exactly 245px → all same-row cards identical height */}
                 <div
                     className="grid grid-cols-1 md:grid-cols-3 gap-3"
                     style={{ gridAutoRows: '245px' }}
@@ -266,7 +160,7 @@ function Features() {
 
                     {/* ── Editor (2 cols × 2 rows) ── */}
                     <div className="md:col-span-2 md:row-span-2 rounded-[16px] border border-[#E8E8E3] bg-[#FAFAF9] overflow-hidden flex flex-col p-5">
-                        {/* Scrollable editor preview — fade at bottom signals more content */}
+                        {/* Scrollable editor preview → fade at bottom signals more content */}
                         <div className="relative flex-1 min-h-0 mb-3 overflow-hidden">
                             <div className="flex flex-col gap-[5px]">
                                 {[
@@ -279,7 +173,7 @@ function Features() {
                                     { sym: '∑',   w: '50%' },
                                     { sym: '▶',   w: '64%' },
                                     { sym: '¶',   w: '55%', dim: true },
-                                    { sym: '—',   w: '90%', dim: true },
+                                    { sym: '→',   w: '90%', dim: true },
                                 ].map(({ sym, w, mono, tinted, bg, dim }, i) => (
                                     <div
                                         key={i}
@@ -295,10 +189,10 @@ function Features() {
                                     </div>
                                 ))}
                             </div>
-                            {/* Fade — makes editor look like scrollable content */}
+                            {/* Fade → makes editor look like scrollable content */}
                             <div className="absolute inset-x-0 bottom-0 h-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, #FAFAF9)' }} />
                         </div>
-                        <CardFooter label="Editor" title="Every block type you need." desc="Text, code, tables, callouts, equations, and embeds — all in one canvas." />
+                        <CardFooter label="Editor" title="Every block type you need." desc="Text, code, tables, callouts, equations, and embeds → all in one canvas." />
                     </div>
 
                     {/* ── AI ── */}
@@ -334,7 +228,7 @@ function Features() {
                                         <div className="h-[7px] w-28 rounded-[3px] bg-[#DDDDD8]" />
                                         <span className="text-[8.5px] font-semibold px-1.5 py-[2px] rounded-[4px] text-[#2563EB]" style={{ background: '#EEF4FD', border: '1px solid #C7DDF8' }}>Live</span>
                                     </div>
-                                    <div className="text-[9.5px] text-[#ADADAA] mt-0.5">Today · 10:00 — 11:00 AM</div>
+                                    <div className="text-[9.5px] text-[#ADADAA] mt-0.5">Today · 10:00 → 11:00 AM</div>
                                     <div className="mt-2.5 flex flex-col gap-1.5">
                                         <div className="h-[5px] rounded-[3px] bg-[#EAEAE6] w-full" />
                                         <div className="h-[5px] rounded-[3px] bg-[#EAEAE6] w-4/5" />
@@ -351,7 +245,7 @@ function Features() {
                                 </div>
                             </div>
                         </div>
-                        <CardFooter label="Meetings" title="Linked to the rest of your work." desc="Notes, action items, and decisions — all connected." />
+                        <CardFooter label="Meetings" title="Linked to the rest of your work." desc="Notes, action items, and decisions → all connected." />
                     </div>
 
                     {/* ── Calendar ── */}
@@ -409,7 +303,7 @@ function Features() {
 
                     {/* ── Collaboration (2 cols wide) ── */}
                     <div className="md:col-span-2 rounded-[16px] border border-[#E8E8E3] bg-[#FAFAF9] overflow-hidden flex flex-col p-5">
-                        {/* 2×2 grid of presence pills — fills the full width evenly */}
+                        {/* 2×2 grid of presence pills → fills the full width evenly */}
                         <div className="flex-1 min-h-0 mb-3 grid grid-cols-2 gap-2 content-center overflow-hidden">
                             {[
                                 { init: 'K', color: '#E8D5C4', page: 'Roadmap Q2',    status: 'editing' },
@@ -427,7 +321,7 @@ function Features() {
                                 </div>
                             ))}
                         </div>
-                        <CardFooter label="Collaboration" title="Everyone on the same page." desc="Live presence, instant sync, and role-based permissions — built in from day one." />
+                        <CardFooter label="Collaboration" title="Everyone on the same page." desc="Live presence, instant sync, and role-based permissions → built in from day one." />
                     </div>
 
                     {/* ── Permissions (dark) ── */}
@@ -602,9 +496,9 @@ function Footer() {
                     <div className="shrink-0">
                         <Link href="/" className="flex items-center gap-2 mb-3">
                             <div className="w-[34px] h-[34px] flex items-center justify-center rounded-[10px] bg-[#FAFAF9] border border-[#E8E8E3] overflow-hidden shadow-sm shrink-0">
-                                <Image src="/auroralighticon.png" alt="aurora" width={22} height={22} className="object-contain" />
+                                <Image src="/sporelighticon.png" alt="spore" width={22} height={22} className="object-contain" />
                             </div>
-                            <span className="text-[17px] font-semibold text-[#0A0A0A] tracking-[-0.4px]">aurora</span>
+                            <span className="text-[17px] font-semibold text-[#0A0A0A] tracking-[-0.4px]">spore</span>
                         </Link>
                         <p className="text-[12.5px] text-[#ADADAA] leading-relaxed max-w-[160px]">
                             Workspace for teams that think together.
@@ -631,7 +525,7 @@ function Footer() {
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-7">
                     <p className="text-[12px] text-[#C4C4C0]">
-                        © {new Date().getFullYear()} Aurora, Inc.
+                        © {new Date().getFullYear()} spore, Inc.
                     </p>
                     <a href="#" className="flex items-center gap-1 text-[12px] text-[#C4C4C0] hover:text-[#9B9B9B] transition-colors duration-150">
                         System status

@@ -16,7 +16,7 @@ export default function InboxPage() {
                         Connect your inbox
                     </h1>
                     <p className="text-[14px] text-text-secondary mb-8 leading-relaxed">
-                        Connect Gmail or Outlook to see all your messages directly in aurora.
+                        Connect Gmail or Outlook to see all your messages directly in spore.
                     </p>
 
                     <div className="flex flex-col w-full gap-3">

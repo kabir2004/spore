@@ -29,6 +29,16 @@ export default async function WorkspaceSlugLayout({
     const workspace = workspaceData as { id: string; name: string; root_id: string; slug: string } | null;
     if (!workspace) redirect('/login');
 
+    // Verify the current user is a member of this workspace.
+    // RLS guards the data layer, but we need this explicit check for a proper redirect.
+    const { data: membership } = await supabase
+        .from('workspace_members')
+        .select('role')
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+    if (!membership) redirect('/login');
+
     return (
         <WorkspaceShell
             slug={workspace.slug}
