@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Arimo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/context/themeContext";
-import { StoreRehydrate } from "@/lib/components/StoreRehydrate";
 
 const arimo = Arimo({
   variable: "--font-arimo",
@@ -33,9 +32,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${arimo.variable} ${jetbrains.variable} font-sans antialiased bg-bg-primary text-text-primary`}>
+        <body className={`${arimo.variable} ${jetbrains.variable} font-sans antialiased bg-bg-primary text-text-primary`}>
         <ThemeProvider>
-          <StoreRehydrate />
           {children}
         </ThemeProvider>
       </body>

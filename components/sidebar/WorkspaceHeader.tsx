@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { ChevronDown, Check, Plus, PanelLeftClose } from 'lucide-react';
+import { ChevronDown, Check, Plus, PanelLeftClose, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/lib/context/workspaceContext';
 import { useWorkspaceStore } from '@/lib/store/workspaceStore';
@@ -118,6 +119,20 @@ export function WorkspaceHeader() {
                                 {wsSlug === slug && <Check size={13} className="text-accent-blue shrink-0" />}
                             </button>
                         ))}
+                    </div>
+
+                    <div className="h-px bg-border-light" />
+
+                    {/* Settings link */}
+                    <div className="px-1.5 pb-1">
+                        <Link
+                            href={`/${slug}/settings`}
+                            onClick={() => setDropdownOpen(false)}
+                            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-[6px] text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors text-[13px]"
+                        >
+                            <Settings size={14} />
+                            <span>Settings</span>
+                        </Link>
                     </div>
 
                     <div className="h-px bg-border-light" />

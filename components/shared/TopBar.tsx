@@ -1,15 +1,14 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Share2, MoreHorizontal, Moon, Sun } from 'lucide-react';
+import { Share2, MoreHorizontal } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { Avatar } from './Avatar';
+import { ProfileMenu } from './ProfileMenu';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useWorkspaceStore } from '@/lib/store/workspaceStore';
 import { useWorkspace } from '@/lib/context/workspaceContext';
-import { useTheme } from '@/lib/context/themeContext';
 import { IBlock } from '@/lib/types/block';
 
 const DynamicIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -36,7 +35,6 @@ function findPageTrail(getBlock: (id: string) => IBlock | undefined, targetId: s
 export function TopBar() {
     const params = useParams();
     const { slug } = useWorkspace();
-    const { theme, toggleTheme } = useTheme();
     const pageId = params.pageId as string | undefined;
     const getBlock = useWorkspaceStore(state => state.getBlock);
     const workspaceName = useWorkspaceStore(state => state.workspaces[slug as string]?.name);
@@ -86,13 +84,6 @@ export function TopBar() {
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
-                <button
-                    onClick={toggleTheme}
-                    className="text-text-muted hover:text-text-primary p-1.5 rounded-[5px] hover:bg-bg-hover transition-colors"
-                    title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-                >
-                    {theme === 'light' ? <Moon size={17} /> : <Sun size={17} />}
-                </button>
                 <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12.5px] font-medium text-text-secondary rounded-[6px] hover:bg-bg-hover transition-colors">
                     <Share2 size={13} />
                     <span>Share</span>
@@ -101,7 +92,7 @@ export function TopBar() {
                     <MoreHorizontal size={17} />
                 </button>
                 <div className="h-4 w-px bg-border-default mx-1" />
-                <Avatar name="Kabir" size={26} />
+                <ProfileMenu />
             </div>
         </header>
     );

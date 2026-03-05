@@ -902,11 +902,52 @@ function MonthView({ year, month, gridDays, events, now, onDayClick, onEventClic
 
 // ─── CalendarPage (main export) ───────────────────────────────────────────────
 
-export function CalendarPage() {
+import type { CalendarEvent as DBCalendarEvent } from '@/lib/types/calendarEvent';
+
+function dbEventToCalEvent(e: DBCalendarEvent): CalEvent {
+    const colorMap: Record<string, EventColor> = {
+        '#2383E2': 'blue', '#0F7B6C': 'green', '#E03E3E': 'red',
+        '#D9730D': 'orange', '#6940A5': 'purple', '#AD1A72': 'pink',
+        google: 'blue', microsoft: 'purple', spore: 'blue', cal_com: 'green',
+    };
+    const color: EventColor = (e.color && colorMap[e.color])
+        || colorMap[e.source]
+        || 'blue';
+    return {
+        id:     e.id,
+        title:  e.title,
+        color,
+        allDay: e.all_day,
+        start:  new Date(e.start_time),
+        end:    new Date(e.end_time),
+    };
+}
+
+interface CalendarPageProps {
+    initialEvents?:        DBCalendarEvent[];
+    workspaceId?:          string;
+    workspaceSlug?:        string;
+    hasGoogleCalendar?:    boolean;
+    hasMicrosoftCalendar?: boolean;
+}
+
+export function CalendarPage({
+    initialEvents,
+    workspaceId,
+    workspaceSlug,
+    hasGoogleCalendar    = false,
+    hasMicrosoftCalendar = false,
+}: CalendarPageProps = {}) {
     const [now, setNow] = useState<Date>(INIT_DATE);
     const [anchor, setAnchor] = useState<Date>(INIT_DATE);
     const [view, setView] = useState<CalView>('week');
-    const [events, setEvents] = useState<CalEvent[]>(INITIAL_EVENTS);
+
+    // Seed from DB events if available, else fall back to demo data
+    const seedEvents = initialEvents?.length
+        ? initialEvents.map(dbEventToCalEvent)
+        : INITIAL_EVENTS;
+
+    const [events, setEvents] = useState<CalEvent[]>(seedEvents);
     const [draft, setDraft] = useState<EventDraft | null>(null);
 
     // Update to real date/time on client mount; tick every minute
@@ -1046,6 +1087,24 @@ export function CalendarPage() {
                         ))}
                     </div>
 
+                    {/* Integration pills */}
+                    {(hasGoogleCalendar || hasMicrosoftCalendar) && (
+                        <div className="flex items-center gap-1.5">
+                            {hasGoogleCalendar && (
+                                <span className="flex items-center gap-1 text-[11.5px] font-medium text-[#4285F4] bg-[#4285F4]/10 border border-[#4285F4]/20 px-2 py-0.5 rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#4285F4]" />
+                                    Google
+                                </span>
+                            )}
+                            {hasMicrosoftCalendar && (
+                                <span className="flex items-center gap-1 text-[11.5px] font-medium text-[#0078D4] bg-[#0078D4]/10 border border-[#0078D4]/20 px-2 py-0.5 rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0078D4]" />
+                                    Outlook
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     {/* New event */}
                     <button
                         onClick={() => openCreate(anchor)}
@@ -1054,6 +1113,16 @@ export function CalendarPage() {
                         <Plus size={14} />
                         New event
                     </button>
+
+                    {/* Connect calendar CTA when no integrations */}
+                    {!hasGoogleCalendar && !hasMicrosoftCalendar && workspaceSlug && (
+                        <a
+                            href={`/${workspaceSlug}/settings/integrations`}
+                            className="flex items-center gap-1.5 px-3 py-[7px] rounded-[7px] border border-border-default text-[12.5px] font-medium text-text-secondary hover:bg-bg-hover transition-colors"
+                        >
+                            Connect calendar
+                        </a>
+                    )}
                 </div>
             </div>
 

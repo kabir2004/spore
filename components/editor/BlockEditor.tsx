@@ -161,13 +161,75 @@ export const BlockEditor = ({ rootBlockId }: { rootBlockId: string }) => {
         return () => window.removeEventListener(SPORE_APPLY_FORMAT_TO_ALL, handler as EventListener);
     }, [rootBlockId, contentIds, updateBlock]);
 
+    const coverImage = rootBlock.properties?.coverImage ?? null;
+
+    const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        updateBlock(rootBlockId, { properties: { ...rootBlock.properties, coverImage: url } });
+    };
+
+    const removeCover = () => {
+        updateBlock(rootBlockId, { properties: { ...rootBlock.properties, coverImage: undefined } });
+    };
+
     return (
         <DocumentSelectAllProvider>
             <SelectionToolbar />
+
+            {/* ── Cover image (Notion-style, above the main column) ── */}
+            {coverImage ? (
+                <div className="group relative w-full h-[220px] mb-0 overflow-hidden shrink-0">
+                    <img
+                        src={coverImage}
+                        alt="Page cover"
+                        className="w-full h-full object-cover select-none"
+                        draggable={false}
+                    />
+                    {/* Hover overlay with actions */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    <div className="absolute bottom-3 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-bg-primary/90 backdrop-blur-sm text-[12.5px] font-medium text-text-primary hover:bg-bg-primary transition-colors cursor-pointer shadow-sm">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleCoverUpload}
+                            />
+                            Change cover
+                        </label>
+                        <button
+                            onClick={removeCover}
+                            className="px-3 py-1.5 rounded-[6px] bg-bg-primary/90 backdrop-blur-sm text-[12.5px] font-medium text-text-secondary hover:text-text-primary hover:bg-bg-primary transition-colors shadow-sm"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            ) : null}
+
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex flex-col w-full max-w-[720px] mx-auto pt-16 pb-40 px-4">
+                <div className={`flex flex-col w-full max-w-[720px] mx-auto pb-40 px-4 ${coverImage ? 'pt-10' : 'pt-16'}`}>
+
+                    {/* Add cover / Add icon hint row (shown on hover of title area) */}
+                    {!coverImage && (
+                        <div className="group/header pl-10 mb-2 flex items-center gap-2">
+                            <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[12.5px] font-medium text-text-placeholder hover:text-text-muted hover:bg-bg-hover transition-colors cursor-pointer opacity-0 group-hover/header:opacity-100">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleCoverUpload}
+                                />
+                                <span className="text-[14px] leading-none">🖼</span>
+                                Add cover
+                            </label>
+                        </div>
+                    )}
+
                     {/* Page icon — aligned with content column */}
-                    <div className="pl-10 mb-5">
+                    <div className={`pl-10 mb-4 ${coverImage ? '-mt-8' : ''}`}>
                         <PageIconPicker
                             value={rootBlock.properties?.icon ?? 'FileText'}
                             onChange={(icon) =>

@@ -9,7 +9,6 @@ import { Avatar } from '@/components/shared/Avatar';
 import { cn } from '@/lib/utils';
 
 type Provider = 'gmail' | 'outlook';
-type OAuthStep = 'email' | 'permissions' | 'connecting' | 'done';
 type Tab = 'all' | 'unread' | 'starred';
 
 interface Email {
@@ -135,7 +134,7 @@ function OAuthModal({ provider, onConnected, onClose }: {
     onConnected: (email: string) => void;
     onClose: () => void;
 }) {
-    const [step, setStep] = useState<OAuthStep>('email');
+    const [step, setStep] = useState<'email' | 'permissions' | 'connecting' | 'done'>('email');
     const [email, setEmail] = useState('');
     const config = PROVIDER_CONFIG[provider];
 
@@ -324,9 +323,24 @@ function EmailRow({ email, isSelected, onSelect, onStar }: {
 
 // --- Main InboxPage ---
 
-export function InboxPage() {
-    const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
-    const [provider, setProvider] = useState<Provider | null>(null);
+interface InboxPageProps {
+    workspaceId?:   string;
+    workspaceSlug?: string;
+    connectedGmail?:   string | null;
+    connectedOutlook?: string | null;
+}
+
+export function InboxPage({
+    workspaceId,
+    workspaceSlug,
+    connectedGmail   = null,
+    connectedOutlook = null,
+}: InboxPageProps = {}) {
+    const initialEmail    = connectedGmail ?? connectedOutlook ?? null;
+    const initialProvider = connectedGmail ? 'gmail' : connectedOutlook ? 'outlook' : null;
+
+    const [connectedEmail, setConnectedEmail] = useState<string | null>(initialEmail);
+    const [provider, setProvider] = useState<Provider | null>(initialProvider);
     const [pendingProvider, setPendingProvider] = useState<Provider | null>(null);
     const [emails, setEmails] = useState<Email[]>(MOCK_EMAILS);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -395,49 +409,81 @@ export function InboxPage() {
         { id: 'starred', label: 'Starred', count: starredCount },
     ];
 
+    // Build OAuth URLs using real routes when workspaceId is available
+    const buildOAuthUrl = (prov: Provider) => {
+        if (!workspaceId || !workspaceSlug) return null;
+        const providerKey = prov === 'gmail' ? 'google_gmail' : 'microsoft_outlook';
+        const oauthBase   = prov === 'gmail' ? 'google' : 'microsoft';
+        const returnTo    = `/${workspaceSlug}/inbox`;
+        const params = new URLSearchParams({
+            provider:       providerKey,
+            workspace_id:   workspaceId,
+            workspace_slug: workspaceSlug,
+            return_to:      returnTo,
+        });
+        return `/api/integrations/${oauthBase}/authorize?${params}`;
+    };
+
     // Disconnected state — same layout as Sign page: absolute inset-0, centered
     if (!connectedEmail) {
         return (
-            <>
-                {pendingProvider && (
-                    <OAuthModal
-                        provider={pendingProvider}
-                        onConnected={handleConnected}
-                        onClose={() => setPendingProvider(null)}
-                    />
-                )}
-                <div className="absolute inset-0 flex items-center justify-center w-full px-6 py-12">
-                    <div className="flex flex-col items-center text-center max-w-[440px] w-full">
-                        <div className="mb-8 w-16 h-16 rounded-2xl bg-bg-elevated border border-border-default flex items-center justify-center shadow-sm">
-                            <Inbox size={32} className="text-text-primary" />
-                        </div>
-                        <h1 className="text-[24px] font-bold tracking-tight text-text-primary mb-2">
-                            Connect your inbox
-                        </h1>
-                        <p className="text-[14px] text-text-secondary mb-8 leading-relaxed">
-                            Connect Gmail or Outlook to see all your messages directly in spore.
-                        </p>
-                        <div className="flex flex-col w-full gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setPendingProvider('gmail')}
-                                className="relative flex items-center justify-center w-full h-11 px-4 text-[15px] font-medium text-text-primary bg-bg-primary border border-border-default rounded-md hover:bg-bg-hover hover:border-border-light transition-all active:scale-[0.98]"
-                            >
-                                <div className="absolute left-4 w-5 h-5 rounded-full bg-[#EA4335] shrink-0" />
-                                <span className="text-[15px] font-medium">Connect Gmail</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPendingProvider('outlook')}
-                                className="relative flex items-center justify-center w-full h-11 px-4 text-[15px] font-medium text-text-primary bg-bg-primary border border-border-default rounded-md hover:bg-bg-hover hover:border-border-light transition-all active:scale-[0.98]"
-                            >
-                                <div className="absolute left-4 w-5 h-5 rounded-full bg-[#0078D4] shrink-0" />
-                                <span className="text-[15px] font-medium">Connect Outlook</span>
-                            </button>
-                        </div>
+            <div className="absolute inset-0 flex items-center justify-center w-full px-6 py-12">
+                <div className="flex flex-col items-center text-center max-w-[440px] w-full">
+                    <div className="mb-8 w-16 h-16 rounded-2xl bg-bg-elevated border border-border-default flex items-center justify-center shadow-sm">
+                        <Inbox size={32} className="text-text-primary" />
                     </div>
+                    <h1 className="text-[24px] font-bold tracking-tight text-text-primary mb-2">
+                        Connect your inbox
+                    </h1>
+                    <p className="text-[14px] text-text-secondary mb-8 leading-relaxed">
+                        Connect Gmail or Outlook to see all your messages directly in spore.
+                    </p>
+                    <div className="flex flex-col w-full gap-3">
+                        {(['gmail', 'outlook'] as Provider[]).map((prov) => {
+                            const config  = PROVIDER_CONFIG[prov];
+                            const oauthUrl = buildOAuthUrl(prov);
+                            const label   = `Connect ${config.name}`;
+                            return oauthUrl ? (
+                                <a
+                                    key={prov}
+                                    href={oauthUrl}
+                                    className="relative flex items-center justify-center w-full h-11 px-4 text-[15px] font-medium text-text-primary bg-bg-primary border border-border-default rounded-md hover:bg-bg-hover hover:border-border-light transition-all active:scale-[0.98]"
+                                >
+                                    <div
+                                        className="absolute left-4 w-5 h-5 rounded-full shrink-0"
+                                        style={{ backgroundColor: config.accentColor }}
+                                    />
+                                    <span className="text-[15px] font-medium">{label}</span>
+                                </a>
+                            ) : (
+                                <button
+                                    key={prov}
+                                    type="button"
+                                    onClick={() => setPendingProvider(prov)}
+                                    className="relative flex items-center justify-center w-full h-11 px-4 text-[15px] font-medium text-text-primary bg-bg-primary border border-border-default rounded-md hover:bg-bg-hover hover:border-border-light transition-all active:scale-[0.98]"
+                                >
+                                    <div
+                                        className="absolute left-4 w-5 h-5 rounded-full shrink-0"
+                                        style={{ backgroundColor: config.accentColor }}
+                                    />
+                                    <span className="text-[15px] font-medium">{label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="text-[12px] text-text-muted mt-5">
+                        You can also connect your inbox from{' '}
+                        {workspaceSlug && (
+                            <a
+                                href={`/${workspaceSlug}/settings/integrations`}
+                                className="text-accent-blue hover:underline"
+                            >
+                                Settings → Integrations
+                            </a>
+                        )}
+                    </p>
                 </div>
-            </>
+            </div>
         );
     }
 
