@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { IntegrationsSettings } from '@/components/settings/IntegrationsSettings';
-import { getIntegrations, disconnectIntegration, connectCalCom } from '@/lib/actions/integrations';
+import { getIntegrations, disconnectIntegration, connectCalCom, connectAIProvider } from '@/lib/actions/integrations';
 import { syncGoogleCalendar, syncMicrosoftCalendar } from '@/lib/actions/calendarEvents';
 import type { IntegrationProvider } from '@/lib/types/integration';
 
@@ -44,6 +44,14 @@ export default async function IntegrationsPage({
     return syncMicrosoftCalendar(workspace!.id);
   }
 
+  async function handleConnectAI(
+    provider: 'anthropic' | 'openai' | 'google_gemini' | 'groq',
+    apiKey: string
+  ) {
+    'use server';
+    return connectAIProvider(provider, apiKey, workspace!.id);
+  }
+
   return (
     <Suspense>
       <IntegrationsSettings
@@ -52,6 +60,7 @@ export default async function IntegrationsPage({
         workspaceSlug={workspaceSlug}
         onDisconnect={handleDisconnect}
         onConnectCalCom={handleConnectCalCom}
+        onConnectAI={handleConnectAI}
         onSync={handleSync}
       />
     </Suspense>
